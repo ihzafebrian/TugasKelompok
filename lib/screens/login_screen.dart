@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vaporate/screens/dashboard_screen.dart'; // Import dashboard screen
+import 'package:vaporate/screens/dashboard_screen.dart';
+import 'package:vaporate/screens/auth/register_screen.dart'; // Tambahkan ini
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -15,7 +16,7 @@ class LoginScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.store_mall_directory,
                 size: 80,
                 color: Colors.tealAccent,
@@ -66,7 +67,14 @@ class LoginScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DashboardScreen(),
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.login),
                   label: Text(
                     'Masuk',
@@ -85,6 +93,21 @@ class LoginScreen extends StatelessWidget {
               Text(
                 'Lupa Password?',
                 style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                  );
+                },
+                child: Text(
+                  'Belum punya akun? Daftar di sini',
+                  style: GoogleFonts.poppins(
+                    color: Colors.tealAccent,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ],
           ),
