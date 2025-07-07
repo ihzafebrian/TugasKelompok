@@ -23,7 +23,7 @@ class DashboardScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => _logout(context),
-          )
+          ),
         ],
       ),
       body: Padding(
@@ -84,10 +84,12 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuCard(BuildContext context,
-      {required IconData icon,
-      required String label,
-      required VoidCallback onTap}) {
+  Widget _buildMenuCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Card(
@@ -101,8 +103,11 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 label,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              )
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
         ),
