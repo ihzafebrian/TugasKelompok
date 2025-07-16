@@ -5,20 +5,12 @@ class ProdukList extends StatelessWidget {
   const ProdukList({super.key});
 
   final List<Map<String, dynamic>> dummyProduk = const [
-    {
-      'nama': 'Vape X200',
-      'harga': 150000,
-      'gambar': '1.png'
-    },
-    {
-      'nama': 'Liquid Mangga',
-      'harga': 60000,
-      'gambar': '2.png'
-    },
+    {'nama': 'Vape X200', 'harga': 150000, 'gambar': '1.png'},
+    {'nama': 'Liquid Mangga', 'harga': 60000, 'gambar': '2.png'},
     {
       'nama': 'Pod Mini S',
       'harga': 125000,
-      'gambar': 'https://via.placeholder.com/150'
+      'gambar': 'https://via.placeholder.com/150',
     },
   ];
 
@@ -62,19 +54,24 @@ class ProdukList extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
                     child: Image.network(
                       produk['gambar'],
                       height: 100,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const SizedBox(
-                        height: 100,
-                        child: Center(
-                          child: Icon(Icons.broken_image, color: Colors.grey),
-                        ),
-                      ),
+                      errorBuilder:
+                          (_, __, ___) => const SizedBox(
+                            height: 100,
+                            child: Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
                     ),
                   ),
                   Padding(
@@ -92,9 +89,7 @@ class ProdukList extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           'Rp ${produk['harga']}',
-                          style: GoogleFonts.poppins(
-                            color: Colors.tealAccent,
-                          ),
+                          style: GoogleFonts.poppins(color: Colors.tealAccent),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
@@ -107,7 +102,7 @@ class ProdukList extends StatelessWidget {
                             ),
                           ),
                           child: const Text('BELI'),
-                        )
+                        ),
                       ],
                     ),
                   ),
