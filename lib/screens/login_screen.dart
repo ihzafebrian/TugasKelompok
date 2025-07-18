@@ -1,10 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vaporate/screens/dashboard_screen.dart';
-import 'package:vaporate/screens/auth/register_screen.dart'; // Tambahkan ini
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vaporate/services/api_service.dart';
 
-class LoginScreen extends StatelessWidget {
+import 'package:vaporate/screens/kasir/dashboard_screen.dart';
+import 'package:vaporate/screens/owner/laporan_owner_screen.dart';
+
+import 'package:vaporate/screens/auth/register_screen.dart';
+
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool isLoading = false;
+  Future<void> login() async {
+    setState(() => isLoading = true);
+
+    final response = await ApiService.login(
+      emailController.text,
+      passwordController.text,
+    );
+
+    setState(() => isLoading = false);
+
+    if (response != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', response['token']);
+      await prefs.setString('role', response['user']['role']);
+
+      final role = response['user']['role'].toString().toLowerCase();
+
+      if (role == 'pemilik') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LaporanOwnerScreen()),
+        );
+      } else if (role == 'kasir') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Role tidak diizinkan login')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login gagal. Periksa email dan password'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +86,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               TextField(
+                controller: emailController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Email',
@@ -49,6 +104,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               TextField(
+                controller: passwordController,
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
@@ -67,17 +123,20 @@ class LoginScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DashboardScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.login),
+                  onPressed: isLoading ? null : login,
+                  icon:
+                      isLoading
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.black,
+                            ),
+                          )
+                          : const Icon(Icons.login),
                   label: Text(
-                    'Masuk',
+                    isLoading ? 'Loading...' : 'Masuk',
                     style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(

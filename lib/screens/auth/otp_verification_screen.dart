@@ -1,7 +1,7 @@
 // otp_verification_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../dashboard_screen.dart';
+import '../kasir/dashboard_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String email;
