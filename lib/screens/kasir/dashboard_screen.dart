@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../produk/produk_list.dart';
-import '../transaksi/transaksi_screen.dart';
+import 'produk/produk_list.dart';
+import 'transaksi/transaksi_screen.dart';
 import '../laporan_screen.dart';
 import '../login_screen.dart';
-import '../supplier/supplier_list.dart';
+import 'supplier/supplier_list.dart';
 import '../user/user_list.dart';
+import 'kategori/kategori_screen.dart';
+import 'supplier/supplier_form_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -41,7 +43,7 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Halo, Admin!',
+              'Halo, Kasir!',
               style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontSize: 22,
@@ -80,7 +82,9 @@ class DashboardScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const SupplierList()),
+                        MaterialPageRoute(
+                          builder: (_) => const SupplierListScreen(),
+                        ),
                       );
                     },
                   ),
@@ -102,9 +106,9 @@ class DashboardScreen extends StatelessWidget {
                     label: 'Kategori',
                     color: Colors.orangeAccent,
                     onTap: () {
-                      Navigator.push(  
+                      Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const SupplierList()),
+                        MaterialPageRoute(builder: (_) => KategoriScreen()),
                       );
                     },
                   ),

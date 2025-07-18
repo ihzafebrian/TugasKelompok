@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vaporate/services/api_service.dart';
 
-import 'package:vaporate/screens/admin/dashboard_screen.dart';
+import 'package:vaporate/screens/kasir/dashboard_screen.dart';
 import 'package:vaporate/screens/owner/laporan_owner_screen.dart';
-import 'package:vaporate/screens/admin/admin_screen.dart';
+
 import 'package:vaporate/screens/auth/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -19,7 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool isLoading = false;
-
   Future<void> login() async {
     setState(() => isLoading = true);
 
@@ -35,14 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setString('token', response['token']);
       await prefs.setString('role', response['user']['role']);
 
-      final role = response['user']['role'];
+      final role = response['user']['role'].toString().toLowerCase();
 
-      if (role == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const DashboardScreen()),
-        );
-      } else if (role == 'owner') {
+      if (role == 'pemilik') {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const LaporanOwnerScreen()),
@@ -50,12 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
       } else if (role == 'kasir') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const KasirScreen()),
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
         );
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Role tidak dikenali')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Role tidak diizinkan login')),
+        );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
