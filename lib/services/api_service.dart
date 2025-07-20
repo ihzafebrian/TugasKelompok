@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ApiService {
   static const String baseUrl = 'http://192.168.1.215:8000/api';
@@ -21,7 +23,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', data['token']); // simpan token
+      await prefs.setString('token', data['token']);
       return data;
     } else {
       print('Login failed: ${response.statusCode}');
@@ -133,7 +135,6 @@ class ApiService {
 
   static Future<void> tambahKategori(String nama) async {
     final response = await post('categories', {'category_name': nama});
-
     if (response.statusCode != 201) {
       print(response.body);
       throw Exception('Gagal menambah kategori');
@@ -142,7 +143,6 @@ class ApiService {
 
   static Future<void> updateKategori(int id, String nama) async {
     final response = await put('categories/$id', {'category_name': nama});
-
     if (response.statusCode != 200) {
       print(response.body);
       throw Exception('Gagal memperbarui kategori');
@@ -157,6 +157,9 @@ class ApiService {
     }
   }
 
+  // =============================
+  // 📦 SUPPLIER
+  // =============================
   static Future<List<Map<String, dynamic>>> getSuppliers() async {
     final token = await _getToken();
     final response = await http.get(
@@ -217,6 +220,90 @@ class ApiService {
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to delete supplier');
+    }
+  }
+
+  // =============================
+  // 📦 PRODUK
+  // =============================
+  static Future<List<Map<String, dynamic>>> fetchProduk() async {
+    final token = await _getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/products'),
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(json.decode(response.body));
+    } else {
+      throw Exception('Gagal mengambil data produk');
+    }
+  }
+
+  static Future<void> createProduk(
+    Map<String, dynamic> data,
+    File? imageFile,
+  ) async {
+    final url = Uri.parse('$baseUrl/products');
+    final token = await _getToken();
+
+    final request = http.MultipartRequest('POST', url);
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Accept'] = 'application/json';
+
+    request.fields['product_name'] = data['product_name'];
+    request.fields['category_id'] = data['category_id'].toString();
+    request.fields['supplier_id'] = data['supplier_id'].toString();
+    request.fields['price'] = data['price'].toString();
+    request.fields['stock'] = data['stock'].toString();
+
+    if (imageFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imageFile.path),
+      );
+    }
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: $responseBody');
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Gagal menyimpan produk: $responseBody');
+    }
+  }
+
+  static Future<void> updateProduk(
+    int id,
+    Map<String, dynamic> data,
+    File? imageFile,
+  ) async {
+    final uri = Uri.parse('$baseUrl/products/$id?_method=PUT');
+    final token = await _getToken();
+
+    final request = http.MultipartRequest('POST', uri);
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Accept'] = 'application/json';
+
+    request.fields['product_name'] = data['product_name'];
+    request.fields['category_id'] = data['category_id'].toString();
+    request.fields['supplier_id'] = data['supplier_id'].toString();
+    request.fields['price'] = data['price'].toString();
+    request.fields['stock'] = data['stock'].toString();
+
+    if (imageFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imageFile.path),
+      );
+    }
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: $responseBody');
+
+    if (response.statusCode != 200) {
+      throw Exception('Gagal update produk: $responseBody');
     }
   }
 }
