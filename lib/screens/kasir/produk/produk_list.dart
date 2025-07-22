@@ -33,7 +33,7 @@ class _ProdukListState extends State<ProdukList> {
     final token = prefs.getString('token');
 
     final response = await http.get(
-      Uri.parse('http://192.168.1.215:8000/api/products'),
+      Uri.parse('http://192.168.10.186:8000/api/products'),
       headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
     );
 
@@ -49,7 +49,7 @@ class _ProdukListState extends State<ProdukList> {
     final token = prefs.getString('token');
 
     final res = await http.delete(
-      Uri.parse('http://192.168.1.215:8000/api/products/$id'),
+      Uri.parse('http://192.168.10.186:8000/api/products/$id'),
       headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
     );
 
@@ -166,7 +166,7 @@ class _ProdukListState extends State<ProdukList> {
                           ? ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
-                              'http://192.168.1.215:8000/storage/$image',
+                              'http://192.168.10.186:8000/storage/$image',
                               width: 50,
                               height: 50,
                               fit: BoxFit.cover,

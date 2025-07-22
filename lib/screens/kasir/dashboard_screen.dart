@@ -8,6 +8,7 @@ import 'supplier/supplier_list.dart';
 import '../user/user_list.dart';
 import 'kategori/kategori_screen.dart';
 import 'supplier/supplier_form_screen.dart';
+import '../kasir/transaksi/transaksi_list.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -122,7 +123,7 @@ class DashboardScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const TransaksiScreen(),
+                          builder: (_) => const TransaksiListScreen(),
                         ),
                       );
                     },
