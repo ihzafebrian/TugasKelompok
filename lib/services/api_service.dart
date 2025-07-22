@@ -3,9 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:vaporate/models/transaksi_model.dart'; // Tambahkan ini
+import 'package:vaporate/models/kategori_model.dart';
+import 'package:vaporate/models/produk_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.215:8000/api';
+  static const String baseUrl = 'http://192.168.10.186:8000/api';
 
   // =============================
   // 🔐 AUTH
@@ -226,6 +229,20 @@ class ApiService {
   // =============================
   // 📦 PRODUK
   // =============================
+  static Future<List<dynamic>> getProducts() async {
+    final token = await _getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/products'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Gagal memuat produk');
+    }
+  }
+
   static Future<List<Map<String, dynamic>>> fetchProduk() async {
     final token = await _getToken();
     final response = await http.get(
@@ -234,8 +251,18 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(json.decode(response.body));
+      final decoded = json.decode(response.body);
+
+      if (decoded is Map && decoded.containsKey('data')) {
+        return List<Map<String, dynamic>>.from(decoded['data']);
+      } else if (decoded is List) {
+        return List<Map<String, dynamic>>.from(decoded);
+      } else {
+        print('Unexpected response format: $decoded');
+        return [];
+      }
     } else {
+      print('Gagal mengambil data produk: ${response.body}');
       throw Exception('Gagal mengambil data produk');
     }
   }
@@ -304,6 +331,118 @@ class ApiService {
 
     if (response.statusCode != 200) {
       throw Exception('Gagal update produk: $responseBody');
+    }
+  }
+
+  // 🔁 Ambil semua transaksi (List<Transaksi>)
+  static Future<List<Transaksi>> fetchTransaksi() async {
+    final url = Uri.parse('$baseUrl/transactions');
+    final token = await _getToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final List<dynamic> transaksiList = data is List ? data : data['data'];
+
+      return transaksiList.map((json) => Transaksi.fromJson(json)).toList();
+    } else {
+      throw Exception('Gagal memuat transaksi');
+    }
+  }
+
+  static Future<Map<String, dynamic>> simpanTransaksi(
+    Map<String, dynamic> data,
+  ) async {
+    final token = await _getToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/transactions'), // ✅ Pastikan sesuai route backend
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token', // ✅ Diperlukan
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': error['message'] ?? 'Gagal menyimpan transaksi',
+      };
+    }
+  }
+
+  static Future<void> createTransaction(List<TransactionDetail> details) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) throw Exception('Token tidak ditemukan');
+
+    final url = Uri.parse('$baseUrl/transaksis'); // pastikan rute backend benar
+
+    // Susun body JSON
+    final body = jsonEncode({
+      'details':
+          details
+              .map(
+                (detail) => {
+                  'product_id': detail.productId,
+                  'quantity': detail.quantity,
+                  'price': detail.price,
+                  'subtotal': detail.subtotal,
+                },
+              )
+              .toList(),
+    });
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Gagal menyimpan transaksi: ${response.body}');
+    }
+  }
+
+  static Future<List<Product>> fetchProducts() async {
+    final url = Uri.parse('$baseUrl/products');
+    final token = await _getToken();
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body); // ✅ fix di sini
+        return data.map((json) => Product.fromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Gagal memuat produk. Status code: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      print('Error saat fetch produk: $e');
+      throw Exception('Gagal memuat produk');
     }
   }
 }
